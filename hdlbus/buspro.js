@@ -6,7 +6,7 @@ var commandsLink = {
 
 
 module.exports = function(RED) {
-    function BusproControllerNode(n) {
+    function HdlBusControllerNode(n) {
         RED.nodes.createNode(this,n);
         this.host = n.host;
         this.port = n.port || 6000;
@@ -22,10 +22,10 @@ module.exports = function(RED) {
 			node.bus.socket.close();
 		})        
     }
-    RED.nodes.registerType("buspro-controller",BusproControllerNode);
+    RED.nodes.registerType("hdlbus-controller",HdlBusControllerNode);
 
 
-    function BusproIn(config) {
+    function HdlBusIn(config) {
         RED.nodes.createNode(this,config);
         var controller = RED.nodes.getNode(config.controller);
         this.bus = controller.bus;
@@ -46,9 +46,9 @@ module.exports = function(RED) {
             this.bus.removeListener('command', node.recivedCommand);
 		});
     }
-    RED.nodes.registerType("buspro-in",BusproIn);
+    RED.nodes.registerType("hdlbus-in",HdlBusIn);
 
-    function BusproOut(config) {
+    function HdlBusOut(config) {
         RED.nodes.createNode(this,config);
         var controller = RED.nodes.getNode(config.controller);
         this.bus = controller.bus;
@@ -69,7 +69,7 @@ module.exports = function(RED) {
 
         });
     }
-    RED.nodes.registerType("buspro-out",BusproOut);
+    RED.nodes.registerType("hdlbus-out",HdlBusOut);
 
 
 }

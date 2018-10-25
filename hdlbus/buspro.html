@@ -1,5 +1,5 @@
 <script type="text/javascript">
-    RED.nodes.registerType('buspro-controller',{
+    RED.nodes.registerType('hdlbus-controller',{
         category: 'config',
         defaults: {
             host: {value:"",required:true},
@@ -13,7 +13,7 @@
     });
 </script>
 
-<script type="text/x-red" data-template-name="buspro-controller">
+<script type="text/x-red" data-template-name="hdlbus-controller">
     <div class="form-row">
         <label for="node-config-input-host"><i class="icon-bookmark"></i> Host</label>
         <input type="text" id="node-config-input-host">
@@ -34,11 +34,11 @@
 
 
 <script type="text/javascript">
-    RED.nodes.registerType('buspro-in',{
+    RED.nodes.registerType('hdlbus-in',{
         category: 'input',
         color: '#D8BFD8',
         defaults: {
-            controller: {value:"", type:"buspro-controller"},
+            controller: {value:"", type:"hdlbus-controller"},
             name: {value:""}
         },
         inputs:0,
@@ -50,7 +50,7 @@
     });
 </script>
 
-<script type="text/x-red" data-template-name="buspro-in">
+<script type="text/x-red" data-template-name="hdlbus-in">
     <div class="form-row">
         <label for="node-input-controller"><i class="icon-tag"></i> Gateway</label>
         <input id="node-input-controller">
@@ -61,7 +61,7 @@
     </div>
 </script>
 
-<script type="text/x-red" data-help-name="buspro-in">
+<script type="text/x-red" data-help-name="hdlbus-in">
     <p>Receive commands from BusPro (Smart-Bus) network</p>
     <p><b>msg.sender and msg.target</b> - ID of Device</p>
     <p><b>msg.code</b> - Integer with command operation code</p>
@@ -70,11 +70,11 @@
 
 
 <script type="text/javascript">
-    RED.nodes.registerType('buspro-out',{
+    RED.nodes.registerType('hdlbus-out',{
         category: 'output',
         color: '#D8BFD8',
         defaults: {
-            controller: {value:"", type:"buspro-controller"},
+            controller: {value:"", type:"hdlbus-controller"},
             name: {value:""}
         },
         inputs:1,
@@ -87,7 +87,7 @@
     });
 </script>
 
-<script type="text/x-red" data-template-name="buspro-out">
+<script type="text/x-red" data-template-name="hdlbus-out">
     <div class="form-row">
         <label for="node-input-controller"><i class="icon-tag"></i> Gateway</label>
         <input id="node-input-controller">
@@ -98,7 +98,7 @@
     </div>
 </script>
 
-<script type="text/x-red" data-help-name="buspro-out">
+<script type="text/x-red" data-help-name="hdlbus-out">
     <p>Send commands to BusPro (Smart-Bus) network</p>
     <p><b>msg.target</b> - ID of Device</p>
     <p><b>msg.code</b> - Integer with command operation code</p>

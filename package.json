@@ -1,6 +1,6 @@
 {
-  "name": "node-red-contrib-buspro",
-  "version": "1.0.3",
+  "name": "node-red-contrib-hdlbus",
+  "version": "1.1.0",
   "description": "Node-Red implementation of HDL BusPro (SmartBus) protocol http://hdlautomation.com",
   "main": "index.js",
   "scripts": {
@@ -8,25 +8,25 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/efa2000/node-red-contrib-buspro.git"
+    "url": "git+https://github.com/mrgadgetnz/node-red-contrib-hdlbus.git"
   },
   "keywords": [
     "node-red",
     "hdl",
-    "buspro",
+    "hdlbus",
     "smart-bus"
   ],
   "node-red": {
     "nodes": {
-      "buspro": "buspro/buspro.js"
+      "hdlbus": "hdlbus/hdlbus.js"
     }
   },
-  "author": "efa2000",
+  "author": "mrgadgetnz",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/efa2000/node-red-contrib-buspro/issues"
+    "url": "https://github.com/mrgadgetnz/node-red-contrib-hdlbus/issues"
   },
-  "homepage": "https://github.com/efa2000/node-red-contrib-buspro#readme",
+  "homepage": "https://github.com/mrgadgetnz/node-red-contrib-hdlbus#readme",
   "dependencies": {
     "smart-bus": "^0.4.0"
   }
