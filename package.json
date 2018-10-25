@@ -8,7 +8,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/mrgadgetnz/node-red-contrib-hdlbus.git"
+    "url": "git+https://github.com/mrgadget/node-red-contrib-hdlbus.git"
   },
   "keywords": [
     "node-red",
@@ -21,12 +21,12 @@
       "hdlbus": "hdlbus/hdlbus.js"
     }
   },
-  "author": "mrgadgetnz",
+  "author": "mrgadget",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/mrgadgetnz/node-red-contrib-hdlbus/issues"
+    "url": "https://github.com/mrgadget/node-red-contrib-hdlbus/issues"
   },
-  "homepage": "https://github.com/mrgadgetnz/node-red-contrib-hdlbus#readme",
+  "homepage": "https://github.com/mrgadget/node-red-contrib-hdlbus#readme",
   "dependencies": {
     "smart-bus": "^0.4.0"
   }
