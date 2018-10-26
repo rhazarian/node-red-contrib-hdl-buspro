@@ -1,0 +1,206 @@
+<script type="text/javascript">
+    RED.nodes.registerType('hdl-controller',{
+        category: 'config',
+        defaults: {
+            host: {value:"", required:true},
+            port: {value:6000, required:true, validate:RED.validators.number()},
+            subnetid: {value: 1, required: true, validate: RED.validators.number()},
+            deviceid: {value: 99, required: true, validate: RED.validators.number()}
+        },
+        label: function() {
+            return "hdl://"+this.subnetid+"."+this.deviceid+"@"+this.host+":"+this.port;
+        }
+    });
+</script>
+
+<script type="text/x-red" data-template-name="hdl-controller">
+    <div class="form-row">
+        <label for="node-config-input-host"><i class="icon-bookmark"></i> Host</label>
+        <input type="text" id="node-config-input-host">
+    </div>
+    <div class="form-row">
+        <label for="node-config-input-port"><i class="icon-bookmark"></i> Port</label>
+        <input type="text" id="node-config-input-port">
+    </div>
+    <div class="form-row">
+        <label for="node-config-input-subnetid"><i class="icon-bookmark"></i> Subnet ID</label>
+        <input type="text" id="node-config-input-subnetid">
+    </div>
+    <div class="form-row">
+        <label for="node-config-input-deviceid"><i class="icon-bookmark"></i> Device ID</label>
+        <input type="text" id="node-config-input-deviceid">
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="hdl-controller">
+    <p>The controller object creates the connection to the network. Create one of these objects globally - creating more than one <i>will</i> have undesirable effects.</p>
+</script>
+
+
+<script type="text/javascript">
+    RED.nodes.registerType('hdl-raw-in',{
+        category: 'input',
+        color: '#D8BFD8',
+        defaults: {
+            controller: {value:"", type:"hdl-controller"},
+            name: {value:""}
+        },
+        inputs:0,
+        outputs:1,
+        icon: "bridge.png",
+        label: function() {
+            return this.name||"hdl";
+        }
+    });
+</script>
+
+<script type="text/x-red" data-template-name="hdl-raw-in">
+    <div class="form-row">
+        <label for="node-input-controller"><i class="icon-tag"></i> Gateway</label>
+        <input id="node-input-controller">
+    </div>
+    <div class="form-row">
+         <label for="node-input-name"><i class="icon-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="hdl-raw-in">
+    <p>Receive commands from the HDL network</p>
+    <p><b>msg.sender and msg.target</b> - ID of Device</p>
+    <p><b>msg.code</b> - Integer with command operation code</p>
+    <p><b>msg.payload</b> - Object with decoded data or raw buffer if data can not be parsed automatically</p>
+</script>
+
+
+<script type="text/javascript">
+    RED.nodes.registerType('hdl-uv-switch-in',{
+        category: 'input',
+        color: '#D8BFD8',
+        defaults: {
+            controller: {value:"", type:"hdl-controller"},
+            switch: {value: null, required: true, validate: RED.validators.number()},
+            name: {value:""},
+            state: {value: true}
+        },
+        inputs:0,
+        outputs:1,
+        icon: "bridge.png",
+        label: function() {
+            return this.name||"hdl uv switch";
+        }
+    });
+</script>
+
+<script type="text/x-red" data-template-name="hdl-uv-switch-in">
+    <div class="form-row">
+        <label for="node-input-controller"><i class="icon-tag"></i> Gateway</label>
+        <input id="node-input-controller">
+    </div>
+    <div class="form-row">
+        <label for="node-input-name"><i class="icon-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+    <div class="form-row">
+        <label for="node-input-switch"><i class="icon-tag"></i> UV Switch</label>
+        <input type="text" id="node-input-switch" placeholder="Switch">
+   </div>
+   <div class="form-row">
+        <label for="node-input-state"><i class="icon-tag"></i> UV State</label>
+        <input type="checkbox" id="node-input-state">
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="hdl-uv-switch-in">
+    <p>Receive UV switch requests from the HDL network</p>
+    <p><b>msg.sender and msg.target</b> - ID of Device</p>
+    <p><b>msg.payload</b> - Object with decoded data or raw buffer if data can not be parsed automatically</p>
+</script>
+
+
+<script type="text/javascript">
+    RED.nodes.registerType('hdl-raw-out',{
+        category: 'output',
+        color: '#D8BFD8',
+        defaults: {
+            controller: {value:"", type:"hdl-controller"},
+            name: {value:""}
+        },
+        inputs:1,
+        outputs:0,
+        icon: "bridge.png",
+        align: 'right',
+        label: function() {
+            return this.name||"hdl";
+        }
+    });
+</script>
+
+<script type="text/x-red" data-template-name="hdl-raw-out">
+    <div class="form-row">
+        <label for="node-input-controller"><i class="icon-tag"></i> Gateway</label>
+        <input id="node-input-controller">
+    </div>
+    <div class="form-row">
+         <label for="node-input-name"><i class="icon-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="hdl-raw-out">
+    <p>Send commands to the HDL network</p>
+    <p><b>msg.target</b> - ID of Device</p>
+    <p><b>msg.code</b> - Integer with command operation code</p>
+    <p><b>msg.payload</b> - Object with data or raw buffer</p>
+</script>
+
+<script type="text/javascript">
+    RED.nodes.registerType('hdl-channel-out',{
+        category: 'output',
+        color: '#D8BFD8',
+        defaults: {
+            controller: {value:"", type:"hdl-controller"},
+            name: {value:""},
+            deviceAddress: {value: '1.1'},
+            channel: {value: 1},
+            level: {value: null, validate: RED.validators.regex('^[1-9][0-9]?$|^100$')}
+        },
+        inputs:1,
+        outputs:0,
+        icon: "bridge.png",
+        align: 'right',
+        label: function() {
+            return this.name||"hdl";
+        }
+    });
+</script>
+
+<script type="text/x-red" data-template-name="hdl-channel-out">
+    <div class="form-row">
+        <label for="node-input-controller"><i class="icon-tag"></i> Gateway</label>
+        <input id="node-input-controller">
+    </div>
+    <div class="form-row">
+        <label for="node-input-name"><i class="icon-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+    <div class="form-row">
+        <label for="node-input-deviceAddress"><i class="icon-tag"></i> Address</label>
+        <input type="text" id="node-input-deviceAddress" placeholder="eg. 1.1">
+    </div>
+    <div class="form-row">
+        <label for="node-input-channel"><i class="icon-tag"></i> Channel</label>
+        <input type="text" id="node-input-channel" placeholder="eg. 5">
+    </div>
+    <div class="form-row">
+        <label for="node-input-level"><i class="icon-tag"></i> Level</label>
+        <input type="text" id="node-input-level" placeholder="0-100">
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="hdl-channel-out">
+    <p>Send commands to the HDL network</p>
+    <p><b>msg.target</b> - ID of Device</p>
+    <p><b>msg.code</b> - Integer with command operation code</p>
+    <p><b>msg.payload</b> - Object with data or raw buffer</p>
+</script>
