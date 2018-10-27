@@ -170,7 +170,7 @@ module.exports = function(RED) {
                 msg.sender = cmd.sender.subnet + "." + cmd.sender.id;
                 msg.payload = cmd.data.level;
                 msg.topic = 'command';
-                console.log(config.level);
+                //console.log(config.level);
                 node.send(msg);
             }
 		};
@@ -242,7 +242,6 @@ module.exports = function(RED) {
                 node.error("Required parameters msg.channel and msg.level");
                 return;
             }
-            console.log(util.inspect(msg));
             var tgtChannel = msg.channel != undefined  ? msg.channel : config.channel;
             var tgtLevel = msg.level != undefined ? msg.level : config.level;
             node.bus.send(config.deviceAddress, 0x31, {channel: tgtChannel, level: tgtLevel}, function(err) {
@@ -256,6 +255,31 @@ module.exports = function(RED) {
         });
     }
     RED.nodes.registerType("hdl-channel-out", HdlChannelOut);
+
+    function HdlUvOut(config) {
+        RED.nodes.createNode(this,config);
+        var controller = RED.nodes.getNode(config.controller);
+        this.bus = controller.bus;
+        var node = this;
+        this.on('input', (msg)=>{
+            //console.log(util.inspect(config));
+            if (!config.switch && (msg.switch == undefined) || ((config.state == undefined) && (msg.state == undefined))) {
+                node.error("Required parameters msg.switch and msg.state");
+                return;
+            }
+            var tgtSwitch = msg.switch != undefined  ? msg.switch : config.switch;
+            var tgtState = msg.state != undefined ? msg.state : config.state;
+            node.bus.send(config.address, 0xE01C, {switch: tgtSwitch, status: tgtState}, function(err) {
+                if (err){
+                    node.error(err);   
+                }
+            });
+        });
+       
+        this.on("close", ()=>{
+        });
+    }
+    RED.nodes.registerType("hdl-uv-out", HdlUvOut);
 
 
 }
