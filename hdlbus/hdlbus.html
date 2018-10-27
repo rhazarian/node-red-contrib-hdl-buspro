@@ -39,7 +39,7 @@
 
 <script type="text/javascript">
     RED.nodes.registerType('hdl-raw-in',{
-        category: 'input',
+        category: 'home automation',
         color: '#D8BFD8',
         defaults: {
             controller: {value:"", type:"hdl-controller"},
@@ -75,7 +75,7 @@
 
 <script type="text/javascript">
     RED.nodes.registerType('hdl-uv-switch-in',{
-        category: 'input',
+        category: 'home automation',
         color: '#D8BFD8',
         defaults: {
             controller: {value:"", type:"hdl-controller"},
@@ -117,10 +117,60 @@
     <p><b>msg.payload</b> - Object with decoded data or raw buffer if data can not be parsed automatically</p>
 </script>
 
+<script type="text/javascript">
+    RED.nodes.registerType('hdl-channel-in',{
+        category: 'home automation',
+        color: '#D8BFD8',
+        defaults: {
+            controller: {value:"", type:"hdl-controller"},
+            address: {value: ""},
+            channel: {value: null, required: true, validate: RED.validators.number()},
+            level: {value: ""},
+            name: {value: ""},
+        },
+        inputs:0,
+        outputs:1,
+        icon: "bridge.png",
+        label: function() {
+            return (this.name||"hdl channel") + ' ' + this.level;
+        }
+    });
+</script>
+
+<script type="text/x-red" data-template-name="hdl-channel-in">
+    <div class="form-row">
+        <label for="node-input-controller"><i class="icon-tag"></i> Gateway</label>
+        <input id="node-input-controller">
+    </div>
+    <div class="form-row">
+        <label for="node-input-name"><i class="icon-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+    <div class="form-row">
+        <label for="node-input-address"><i class="icon-tag"></i> Address</label>
+        <input type="text" id="node-input-address" placeholder="eg 1.20">
+   </div>
+   <div class="form-row">
+        <label for="node-input-channel"><i class="icon-tag"></i> Channel</label>
+        <input type="text" id="node-input-channel">
+    </div>
+    <div class="form-row">
+        <label for="node-input-level"><i class="icon-tag"></i> Level</label>
+        <input type="text" id="node-input-level" placeholder="eg on (> 0), off, 100">
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="hdl-channel-in">
+    <p>Triggers on channel requests from other devices</p>
+    <p><b>msg.sender and msg.target</b> - ID of Device</p>
+    <p><b>msg.payload</b> - Object with decoded data or raw buffer if data can not be parsed automatically</p>
+</script>
+
+
 
 <script type="text/javascript">
     RED.nodes.registerType('hdl-raw-out',{
-        category: 'output',
+        category: 'home automation',
         color: '#D8BFD8',
         defaults: {
             controller: {value:"", type:"hdl-controller"},
@@ -156,7 +206,7 @@
 
 <script type="text/javascript">
     RED.nodes.registerType('hdl-channel-out',{
-        category: 'output',
+        category: 'home automation',
         color: '#D8BFD8',
         defaults: {
             controller: {value:"", type:"hdl-controller"},
