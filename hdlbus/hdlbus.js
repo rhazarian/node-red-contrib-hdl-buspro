@@ -72,13 +72,15 @@ module.exports = function(RED) {
         this.port = n.port || 6000;
         this.subnetid= n.subnetid;
         this.deviceid = n.deviceid;
+        this.broadcast = n.broadcast
         //this.deviceid = parseInt(n.subnetid)+"."+parseInt(n.deviceid);
         this.deviceAddress = parseInt(n.subnetid) + "." + parseInt(n.deviceid);
         var node = this;
 		this.bus = new SmartBus({
-  			device: node.deviceAddress,      // Connector address in HDL network (subnet.id)
-  			gateway: node.host, 		// HDL SmartBus gateway IP
-  			port: node.port                	// and port, default: 6000
+            device: node.deviceAddress,     // Connector address in HDL network (subnet.id)
+  			gateway: node.host, 		    // HDL SmartBus gateway IP
+            port: node.port,                // port, default: 6000
+            broadcast: node.broadcast       // listen to broadcast rather than just specified IP gateway
         });
 
         this.bus.on('command', processCommand);
@@ -97,30 +99,35 @@ module.exports = function(RED) {
 
     function processCommand(cmd) {
         switch (cmd.code) {
-            case 0xe01c:
+            case 0xE01C:
                 if (cmd.target.subnet == ctrlr.subnetid && cmd.target.id == ctrlr.deviceid) {
-                        // UV switch to us, we need to ack this...
-                        ctrlr.bus.send('255.255', 0xE01D, {switch: cmd.data.switch, status: cmd.data.status ? 1 : 0} );
+                    // UV switch to us, we need to ack this...
+                    ctrlr.bus.send('255.255', 0xE01D, {switch: cmd.data.switch, status: cmd.data.status ? 1 : 0} );
                 }
                 break;
-            case 0xe019:
-            case 0xe01d:
+            case 0xE019:
+            case 0xE01D:
                 uvUpd(cmd.target.subnet, cmd.target.id, cmd.data.switch, cmd.data.status);
                 break;
-            case 0x32:
+            case 0x0032:
                 chUpd(cmd.sender.subnet, cmd.sender.id, cmd.data.channel, cmd.data.level);
-                console.log(cmd.data.channel + " " + cmd.data.level);
+                //console.log(cmd.data.channel + " " + cmd.data.level);
+                break;
+            case 0x0033:
+                if (cmd.target.subnet == 1 && cmd.target.id == 20 && cmd.data.channel > 64) {
+                    //Respond on behalf of useless DALI controller for groups (from stored values)
+                    var lvl = chLvl(cmd.target.subnet, cmd.target.id, cmd.data.channel);
+                    ctrlr.bus.sendAs(cmd.target, cmd.sender, 0x0032, {channel: cmd.data.channel, level: lvl, success: true});
+                }
+                break;
+            case 0x0034:
+                for (channel of cmd.data.channels) {
+                    chUpd(cmd.sender.subnet, cmd.sender.id, channel.number, channel.level);
+                    //console.log(channel.number + " " + channel.level);
+                }
                 break;
         }
-        // if (cmd.code == 0xE01C
-        //     && cmd.target.subnet == ctrlr.subnetid
-        //     && cmd.target.id == ctrlr.deviceid
-        //     ) {
-        //         // UV switch to us, we need to ack this...
-        //         ctrlr.bus.send('255.255', 0xE01D, {switch: cmd.data.switch, status: cmd.data.status ? 1 : 0} );
-        // } else {
-        console.log(util.inspect('hdl:' + cmd));
-        // }
+        //console.log(util.inspect('hdl:' + cmd));
     }
 
     function HdlBusIn(config) {
@@ -130,8 +137,8 @@ module.exports = function(RED) {
         node.bus = controller.bus;
         node.receivedCmd = function(cmd){
         	var msg = {};
-		  	msg.sender = cmd.sender.subnet + "." + cmd.sender.id;
-		  	msg.target = cmd.target.subnet + "." + cmd.target.id;
+		  	msg.sender = cmd.sender.address;
+		  	msg.target = cmd.target.address;
 		  	msg.code = cmd.code;
 		  	msg.payload = cmd.data;
             msg.topic = 'command';
@@ -173,8 +180,7 @@ module.exports = function(RED) {
         var controller = RED.nodes.getNode(config.controller);
         var node = this;
         node.bus = controller.bus;
-        node.receivedCmd = function(cmd){
-            
+        node.receivedCmd = function(cmd){    
             if (cmd.code == 0x31
                 && config.address == cmd.target.address
                 && config.channel == cmd.data.channel
@@ -182,18 +188,17 @@ module.exports = function(RED) {
                 switch (config.level) {
                     case 'on':
                         if (cmd.data.level == 0) return;
-                    break;
+                        break;
                     case 'off':
                         if (cmd.data.level > 0) return;
-                    break;
+                        break;
                     default:
                         if (cmd.data.level != config.level) return;
                 }
                 var msg = {};
-                msg.sender = cmd.sender.subnet + "." + cmd.sender.id;
+                msg.sender = cmd.sender.address;// cmd.sender.address;
                 msg.payload = cmd.data.level;
                 msg.topic = 'command';
-                //console.log(config.level);
                 node.send(msg);
             }
 		};
@@ -293,12 +298,12 @@ module.exports = function(RED) {
         node.bus = controller.bus;
         node.receivedCmd = function(cmd){
             if (cmd.code == 0xE01C
-                    && controller.deviceAddress == (cmd.target.subnet + "." + cmd.target.id)
+                    && controller.deviceAddress == (cmd.target.address)
                     && config.switch == cmd.data.switch
                     && (config.state == 2 || config.state == cmd.data.status)
                 ) {
                     var msg = {};
-                    msg.sender = cmd.sender.subnet + "." + cmd.sender.id;
+                    msg.sender = cmd.sender.address;
                     msg.payload = cmd.data.status;
                     msg.topic = 'uv_switch';
                     if (config.reset == true) msg.reset = true;
@@ -422,7 +427,7 @@ module.exports = function(RED) {
             //}
             //var tgtSwitch = msg.switch != undefined  ? msg.switch : config.switch;
             //var tgtState = msg.state != undefined ? msg.state : config.state;
-            node.bus.send(config.address, 0xE14E, {button: config.button, colour: {on: colourOn, off: colourOff}}, function(err) {
+            node.bus.sendAs('253.254', config.address, 0xE14E, {button: config.button, colour: {on: colourOn, off: colourOff}}, function(err) {
                 if (err){
                     node.error(err);   
                 }
@@ -455,7 +460,7 @@ module.exports = function(RED) {
                 var brightness = config.brightness;
                 if (msg.panel.brightness) brightness = msg.panel.brightness
             }
-            node.bus.send(address, 0xE012, {backlight: brightness, statusLights: brightness}, function(err) {
+            node.bus.sendAs('253.254', address, 0xE012, {backlight: brightness, statusLights: brightness}, function(err) {
                 if (err){
                     node.error(err);   
                 }
