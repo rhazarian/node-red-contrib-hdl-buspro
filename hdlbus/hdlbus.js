@@ -181,11 +181,14 @@ module.exports = function(RED) {
         var node = this;
         node.bus = controller.bus;
         node.receivedCmd = function(cmd){    
-            if (cmd.code == 0x31
-                && config.address == cmd.target.address
+            if (cmd.code == 0x32
+                && config.address == cmd.sender.address
                 && config.channel == cmd.data.channel
             ) {
                 switch (config.level) {
+                    case undefined || '':
+                        //Raise event on all changes
+                        break;
                     case 'on':
                         if (cmd.data.level == 0) return;
                         break;
