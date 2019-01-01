@@ -83,6 +83,8 @@ module.exports = function(RED) {
             broadcast: node.broadcast       // listen to broadcast rather than just specified IP gateway
         });
 
+        if (n.daliId) this.daliId = n.daliId;
+
         this.bus.on('command', processCommand);
 
 		this.on("close",function(){
@@ -114,7 +116,7 @@ module.exports = function(RED) {
                 //console.log(cmd.data.channel + " " + cmd.data.level);
                 break;
             case 0x0033:
-                if (cmd.target.subnet == 1 && cmd.target.id == 20 && cmd.data.channel > 64) {
+                if (ctrlr.daliId && cmd.target.subnet == ctrlr.subnetid && cmd.target.id == ctrlr.daliId && cmd.data.channel > 64) {
                     //Respond on behalf of useless DALI controller for groups (from stored values)
                     var lvl = chLvl(cmd.target.subnet, cmd.target.id, cmd.data.channel);
                     ctrlr.bus.sendAs(cmd.target, cmd.sender, 0x0032, {channel: cmd.data.channel, level: lvl, success: true});

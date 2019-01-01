@@ -7,7 +7,8 @@
                 port: {value: 6000, required: true, validate:RED.validators.number()},
                 subnetid: {value: 1, required: true, validate: RED.validators.number()},
                 deviceid: {value: 99, required: true, validate: RED.validators.number()},
-                broadcast: {value: false}
+                broadcast: {value: false},
+                daliId: {value: 0, required: false, validate: RED.validators.number()}
             },
             label: function() {
                 return "hdl://"+this.subnetid+"."+this.deviceid+"@"+this.host+":"+this.port;
@@ -35,6 +36,10 @@
         <div class="form-row">
             <label for="node-config-input-broadcast"><i class="icon-tag"></i> Broadcast</label>
             <input type="checkbox" id="node-config-input-broadcast">
+        </div>
+        <div class="form-row">
+            <label for="node-config-input-daliId"><i class="icon-bookmark"></i> DALI ID</label>
+            <input type="text" id="node-config-input-daliId">
         </div>
     </script>
 
