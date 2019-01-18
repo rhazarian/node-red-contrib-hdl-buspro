@@ -1,5 +1,5 @@
 var util = require("util");
-var SmartBus = require('smart-bus');
+var SmartBus = require('smart-bus-mrgadget');
 var EventEmitter = require('events').EventEmitter;
 var cmdsLink = {
 	49: 50
