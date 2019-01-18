@@ -138,7 +138,6 @@ module.exports = function(RED) {
                 }
                 break;
         }
-        //console.log(util.inspect('hdl:' + cmd));
     }
 
     function HdlBusIn(config) {
@@ -210,8 +209,10 @@ module.exports = function(RED) {
                         if (cmd.data.level != config.level) return;
                 }
                 var msg = {};
-                msg.sender = cmd.sender.address;// cmd.sender.address;
-                msg.payload = cmd.data.level;
+                msg.sender = cmd.sender.address;
+                msg.payload = {
+                    level: cmd.data.level
+                };
                 msg.topic = 'command';
                 node.send(msg);
             }
@@ -231,23 +232,14 @@ module.exports = function(RED) {
         this.bus = controller.bus;
         var node = this;
         this.on('input', (msg)=>{
-            if (msg.payload && msg.payload.config) {
-                if (msg.payload.chOut) {
-                    if (msg.payload.chOut.address) config.address = msg.payload.chOut.address;
-                    if (msg.payload.chOut.channel) config.channel = msg.payload.chOut.channel;
-                    if (msg.payload.chOut.level) config.channel = msg.payload.chOut.level;
-                }
-                //Don't actually do anything with this
-                return;
-            }
-
-            if (!config.channel && (msg.channel == undefined) || (!config.level && (msg.level == undefined))) {
+            if (!config.channel && (msg.payload.channel == undefined) || (!config.level && (msg.payload.level == undefined))) {
                 node.error("Required parameters msg.channel and msg.level");
                 return;
             }
-            var tgtChannel = msg.channel != undefined  ? msg.channel : config.channel;
-            var tgtLevel = msg.level != undefined ? msg.level : config.level;
-            node.bus.send(config.address, 0x31, {channel: tgtChannel, level: tgtLevel}, function(err) {
+            var tgtAddress = msg.payload.address != undefined  ? msg.address : config.address;
+            var tgtChannel = msg.payload.channel != undefined  ? msg.payload.channel : config.channel;
+            var tgtLevel = msg.payload.level != undefined ? msg.payload.level : config.level;
+            node.bus.send(tgtAddress, 0x31, {channel: tgtChannel, level: tgtLevel}, function(err) {
                 if (err){
                     node.error(err);   
                 }
@@ -265,39 +257,26 @@ module.exports = function(RED) {
         this.bus = controller.bus;
         var node = this;
         this.on('input', (msg)=>{
-            if (msg.payload && msg.payload.config) {
-                if (msg.payload.chOut) {
-                    if (msg.payload.chOut.address) config.address = msg.payload.chOut.address;
-                    if (msg.payload.chOut.channel) config.channel = msg.payload.chOut.channel;
-                }
-                //Pass it on
-                node.send(msg);
-                return;
-            }
-
-            if (!config.address && (msg.address == undefined) || !config.channel && (msg.channel == undefined)) {
+            if (!config.address && (msg.payload.address == undefined) || !config.channel && (msg.payload.channel == undefined)) {
                 node.error("Required parameter(s) missing - address (opt:msg.address) and channel (opt:msg.channel) are required.");
                 return;
             }
-            
-            var tgtAddress = msg.address != undefined  ? msg.address : config.address;
-            var tgtChannel = msg.channel != undefined ? msg.channel : config.channel;
-            var ch = tgtAddress.split(".");
+
             if (msg.payload || msg.payload == false) 
                 msg.payload = {original: msg.payload};
             else
                 msg.payload = {};
-            msg.payload.get = {
+
+            var tgtAddress = msg.payload.address != undefined  ? msg.address : config.address;
+            var tgtChannel = msg.payload.channel != undefined ? msg.channel : config.channel;
+            var ch = tgtAddress.split(".");
+
+            msg.payload = {
                 address: tgtAddress, 
                 channel: tgtChannel, 
                 level: chLvl(parseInt(ch[0]), parseInt(ch[1]), parseInt(tgtChannel))
             };
             node.send(msg);
-            // node.bus.send(tgtAddress, 0x31, {channel: tgtChannel}, function(err) {
-            //     if (err){
-            //         node.error(err);   
-            //     }
-            // });
         });
        
         this.on("close", ()=>{
@@ -318,25 +297,12 @@ module.exports = function(RED) {
                 ) {
                     var msg = {};
                     msg.sender = cmd.sender.address;
-                    msg.payload = cmd.data.status;
+                    msg.payload = {state: cmd.data.status};
                     msg.topic = 'uv_switch';
                     if (config.reset == true) msg.reset = true;
                     node.send(msg);
             }
         }
-
-        this.on('input', (msg)=>{
-            //Process the config input
-            if (msg.payload && msg.payload.config) {
-                if (msg.payload.uvIn) {
-                    if (msg.payload.uvIn.address) config.address = msg.payload.uvIn.address;
-                    if (msg.payload.uvIn.switch) config.switch = msg.payload.uvIn.switch;
-                }
-            }
-
-            //Pass it on
-            node.send(msg);
-        });
 
 		this.bus.on('command', node.receivedCmd);
 
@@ -352,14 +318,22 @@ module.exports = function(RED) {
         this.bus = controller.bus;
         var node = this;
         this.on('input', (msg)=>{
-            //console.log(util.inspect(config));
-            if (!config.switch && (msg.switch == undefined) || ((config.state == undefined) && (msg.state == undefined))) {
+            if (!config.switch && (msg.payload.switch == undefined) || ((config.state == undefined) && (msg.payload.state == undefined))) {
                 node.error("Required parameters msg.switch and msg.state");
                 return;
             }
-            var tgtSwitch = msg.switch != undefined  ? msg.switch : config.switch;
-            var tgtState = msg.state != undefined ? msg.state : config.state;
-            node.bus.send(config.address, 0xE01C, {switch: tgtSwitch, status: tgtState}, function(err) {
+
+            // Create payload if it doesn't exist
+            if (!msg.payload) msg.payload = {};
+            
+            // Insert config values if override doesn't exist
+            if (msg.payload.address === undefined) msg.payload.address = config.address;
+            if (msg.payload.switch === undefined ) msg.payload.switch = config.switch;
+            if (msg.payload.state === undefined) msg.payload.state = config.state;
+            msg.payload.status = msg.payload.state;
+
+            console.log(util.inspect(msg));
+            node.bus.send(msg.payload.address, 0xE01C, msg.payload, function(err) {
                 if (err){
                     node.error(err);   
                 }
@@ -371,7 +345,7 @@ module.exports = function(RED) {
     }
     RED.nodes.registerType("hdl-uv-out", HdlUvOut);
 
-    function getColourIndex(name) {
+    function getColorIndex(name) {
         switch (name) {
             case "red": return 2;
             case "green": return 3;
@@ -381,7 +355,7 @@ module.exports = function(RED) {
         }
     }
 
-    function HblBtnColour(config) {
+    function HblBtnColor(config) {
         RED.nodes.createNode(this,config);
         var controller = RED.nodes.getNode(config.controller);
         this.bus = controller.bus;
@@ -392,56 +366,43 @@ module.exports = function(RED) {
             //<option value="3">green</option>
             //<option value="4">blue</option>
             //<option value="5">orange</option>
-            if (msg.payload && msg.payload.config) {
-                if (msg.payload.btn) {
-                    if (msg.payload.btn.colours) {
-                        config.colourOn = getColourIndex(msg.payload.btn.colours);
-                        config.colourOff = getColourIndex(msg.payload.btn.colours);
-                    }
-                    if (msg.payload.btn.colourOn) config.colourOn = getColourIndex(msg.payload.btn.colourOn);
-                    if (msg.payload.btn.colourOff) config.colourOn = getColourIndex(msg.payload.btn.colourOff);
-                }
-                //Don't actually do anything with this
-                return;
-            }
+            var colorOff = payload.colorOff;
+            var colorOn = payload.colorOn;
 
-            var colourOff = config.colourOff;
-            var colourOn = config.colourOn;
-
-            //Colour override
-            if (msg.btnColours) {
-                colourOn = getColourIndex(msg.btnColours);
-                colourOff = getColourIndex(msg.btnColours);
+            //Color override
+            if (msg.btnColors) {
+                colorOn = getColorIndex(msg.btnColors);
+                colorOff = getColorIndex(msg.btnColors);
             }
             
-            switch (parseInt(colourOff)) {
-                case 0: colourOff = [0, 0, 0]; break;
-                case 1: colourOff = [255, 255, 255]; break;
-                case 2: colourOff = [255, 0, 0]; break;
-                case 3: colourOff = [0, 255, 0]; break;
-                case 5: colourOff = [255, 155, 5]; break;
-                default: colourOff = [255, 255, 255]; // white default
+            switch (parseInt(colorOff)) {
+                case 0: colorOff = [0, 0, 0]; break;
+                case 1: colorOff = [255, 255, 255]; break;
+                case 2: colorOff = [255, 0, 0]; break;
+                case 3: colorOff = [0, 255, 0]; break;
+                case 5: colorOff = [255, 155, 5]; break;
+                default: colorOff = [255, 255, 255]; // white default
             }
             
-            switch (parseInt(colourOn)) {
-                case 0: colourOn = [0, 0, 0]; break;
-                case 1: colourOn = [255, 255, 255]; break;
-                case 2: colourOn = [255, 0, 0]; break;
-                case 3: colourOn = [0, 255, 0]; break;
-                case 4: colourOn = [0, 0, 255]; break;
-                case 5: colourOn = [255, 155, 5]; break;
-                default: colourOn = [0, 0, 255]; // blue default
+            switch (parseInt(colorOn)) {
+                case 0: colorOn = [0, 0, 0]; break;
+                case 1: colorOn = [255, 255, 255]; break;
+                case 2: colorOn = [255, 0, 0]; break;
+                case 3: colorOn = [0, 255, 0]; break;
+                case 4: colorOn = [0, 0, 255]; break;
+                case 5: colorOn = [255, 155, 5]; break;
+                default: colorOn = [0, 0, 255]; // blue default
             }
 
-            //console.log(util.inspect(colourOn));
-            //console.log(util.inspect(colourOff));
+            //console.log(util.inspect(colorOn));
+            //console.log(util.inspect(colorOff));
             //if (!config.switch && (msg.switch == undefined) || ((config.state == undefined) && (msg.state == undefined))) {
             //    node.error("Required parameters msg.switch and msg.state");
             //    return;
             //}
             //var tgtSwitch = msg.switch != undefined  ? msg.switch : config.switch;
             //var tgtState = msg.state != undefined ? msg.state : config.state;
-            node.bus.sendAs('253.254', config.address, 0xE14E, {button: config.button, colour: {on: colourOn, off: colourOff}}, function(err) {
+            node.bus.send(config.address, 0xE14E, {button: config.button, color: {on: colorOn, off: colorOff}}, function(err) {
                 if (err){
                     node.error(err);   
                 }
@@ -451,7 +412,7 @@ module.exports = function(RED) {
         this.on("close", ()=>{
         });
     }
-    RED.nodes.registerType("hdl-btn-colour", HblBtnColour);
+    RED.nodes.registerType("hdl-btn-color", HblBtnColor);
 
     function HdlPanelBrightness(config) {
         RED.nodes.createNode(this,config);
@@ -459,22 +420,16 @@ module.exports = function(RED) {
         this.bus = controller.bus;
         var node = this;
         this.on('input', (msg)=>{
-            if (msg.payload && msg.payload.config) {
-                if (msg.payload.panelBrightness)  config.brightness = msg.payload.panelBrightness;
-                //Don't actually do anything with this
-                return;
-            }
+            // Create payload if it doesn't exist
+            if (!msg.payload) msg.payload = {};
             
-            if (msg.panel) {
-                // Address override
-                var address = config.address;
-                if (msg.panel.address) address = msg.panel.address;
+            // Insert config values if override doesn't exist
+            if (msg.payload.address === undefined) msg.payload.address = config.address;
+            if (msg.payload.brightness === undefined ) msg.payload.brightness = config.brightness;
+            msg.payload.backlight = msg.payload.brightness;
+            msg.payload.statusLights = msg.payload.brightness;
 
-                // Brightness override
-                var brightness = config.brightness;
-                if (msg.panel.brightness) brightness = msg.panel.brightness
-            }
-            node.bus.sendAs('253.254', address, 0xE012, {backlight: brightness, statusLights: brightness}, function(err) {
+            node.bus.send(msg.payload.address, 0xE012, msg.payload, function(err) {
                 if (err){
                     node.error(err);   
                 }
@@ -482,6 +437,7 @@ module.exports = function(RED) {
         });
        
         this.on("close", ()=>{
+
         });
     }
     RED.nodes.registerType("hdl-panel-brightness", HdlPanelBrightness);

@@ -6,7 +6,7 @@ The motivation for creating this node set was to fill a perceived gap in functio
 * input/output nodes for device channels
 * input/output nodes for universal switches
 * a get node for device channels (based on stored values)
-* a button colour node to change the LED colour of the new capacitive touch buttons
+* a button color node to change the LED color of the new capacitive touch buttons
 * a panel brightness node to facilitate dimming panels eg. at night
 * raw nodes to allow you to craft messages to send/receive anything on the HDL network
 
@@ -15,7 +15,7 @@ This is by no means perfect - happy to hear any suggestions.
 If you're looking for a event timer - check out [eztimer](https://github.com/mrgadget/node-red-contrib-eztimer).
 
 ## BusPro-Controller
-node that holds connection to IP Gateway of BusPro (Smart-Bus) network
+The node that holds connection to IP Gateway of BusPro (Smart-Bus) network (or broadcast address if using broadcast).
 
 ### Config
 ```js
@@ -28,30 +28,91 @@ defaults: {
 ```
 
 ## hdl-channel-in
-Trigger flows based on pre-determined channel/level messages
+Trigger flows based on pre-determined channel/level messages.
+#### Output Payload
+```js
+{ "level": 0 }
+```
 
 ## hdl-channel-out
-Send channel level request
+Send channel level request.
+#### Input Payload (Optional - used to override/specify any values)
+```js
+{
+    "address": "1.50",
+    "channel": 1,
+    "level" 100
+}
+```
 
 ## hdl-channel-get
-Inject into the message the current level of a given channel.  This is obtained from the level store maintained by watching events (rather than requiring a request/response to get the current level).
+Returns the current level of a given channel.  This is obtained from the level store maintained by watching events (rather than requiring a request/response to get the current level). 
+#### Input Payload (Optional - used to override/specify any values)
+```js
+{
+    "address": "1.50",
+    "channel": 1,
+}
+```
+#### Output Payload
+```js
+{
+    "address": "1.50",
+    "channel": 1,
+    "level" 100
+}
+```
 
 ## hdl-uv-in
-Trigger a flow based on a pre-determined uv switch change
+Trigger a flow based on a pre-determined uv switch change  Response payload example: `{"state": false}`
+#### Output Payload
+```js
+{ "state": false }
+```
 
 ## hdl-uv-out
 Send UV switch request
 
-## hdl-btn-colour
-Send request to update button colour.  This commands supports updating both the **on** and **off** colours independantly.
+#### Input Payload (Optional - used to override/specify any values)
+```js
+{
+    "address": "1.50",
+    "switch": 1,
+    "state" true
+}
+```
+
+## hdl-btn-color
+Send request to update button color.  This commands supports updating both the **on** and **off** colors independantly.  This does not survive a device reboot.
+
+#### Input Payload (Optional - used to override/specify any values)
+1. White
+2. Red
+3. Green
+4. Blue
+5. Orange
+```js
+{
+    "colorOff": 1
+    "colorOn": 4
+}
+```
 
 ## hdl-panel-brightness
-Send request to update panel brightness.
+Send request to update panel brightness (1-255).  Note that low brightness values can impact the colors that can be produced.
+
+#### Input Payload (Optional - used to override/specify any values)
+```js
+{
+    "address": "1.50",
+    "brightness": 1,
+}
+```
 
 ## hdl-raw-in
 Receive (any) commands from HDL (Smart-Bus) network
 
-### Outgoing message
+### Output Message
 ```js
 msg:{
   sender: "1.2" //ID of Sender Device
@@ -64,7 +125,7 @@ msg:{
 ## hdl-raw-out
 Send (any) commands to the HDL (Smart-Bus) network
 
-### Outgoing message
+### Input Message
 ```js
 msg:{
   target: "1.52" //ID of Target Device

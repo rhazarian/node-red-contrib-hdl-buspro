@@ -285,7 +285,7 @@
                 state: {value: 2},
                 reset: {value: -1}
             },
-            inputs:1,
+            inputs:0,
             outputs:1,
             icon: "bridge.png",
             label: function() {
@@ -388,17 +388,17 @@
     </script>
 </div>
 
-<div name='hdl-btn-colour'>
+<div name='hdl-btn-color'>
     <script type="text/javascript">
-        RED.nodes.registerType('hdl-btn-colour',{
+        RED.nodes.registerType('hdl-btn-color',{
             category: 'home automation',
             color: '#D8BFD8',
             defaults: {
                 controller: {value:"", type:"hdl-controller"},
                 address: {value: "", required: true, validate: RED.validators.regex("^(?:[1-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\.(?:[1-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])$")},
                 button: {value: null, required: true, validate: RED.validators.number()},
-                colourOn: {value: 4},
-                colourOff: {value: 1},
+                colorOn: {value: 4},
+                colorOff: {value: 1},
                 name: {value: ""},
             },
             inputs:1,
@@ -406,12 +406,12 @@
             icon: "bridge.png",
             align: 'right',
             label: function() {
-                return (this.name||"hdl btn colour");
+                return (this.name||"hdl btn color");
             }
         });
     </script>
 
-    <script type="text/x-red" data-template-name="hdl-btn-colour">
+    <script type="text/x-red" data-template-name="hdl-btn-color">
         <div class="form-row">
             <label for="node-input-controller"><i class="icon-tag"></i> Gateway</label>
             <input id="node-input-controller">
@@ -429,8 +429,8 @@
             <input type="text" id="node-input-button">
         </div>
         <div class="form-row">
-            <label for="node-input-colourOff"><i class="icon-tag"></i> Colour Off</label>
-            <select id="node-input-colourOff">
+            <label for="node-input-colorOff"><i class="icon-tag"></i> Color Off</label>
+            <select id="node-input-colorOff">
                 <option value="1">white</option>
                 <option value="2">red</option>
                 <option value="3">green</option>
@@ -439,8 +439,8 @@
             </select>
         </div>
         <div class="form-row">
-            <label for="node-input-colourOn"><i class="icon-tag"></i> Colour On</label>
-            <select id="node-input-colourOn">
+            <label for="node-input-colorOn"><i class="icon-tag"></i> Color On</label>
+            <select id="node-input-colorOn">
                 <option value="1">white</option>
                 <option value="2">red</option>
                 <option value="3">green</option>
@@ -450,8 +450,8 @@
         </div>
     </script>
 
-    <script type="text/x-red" data-help-name="hdl-btn-colour">
-        <p>Merges the colour parameters into the message payload to be outputted</p>
+    <script type="text/x-red" data-help-name="hdl-btn-color">
+        <p>Merges the color parameters into the message payload to be outputted</p>
     </script>
 </div>
 
