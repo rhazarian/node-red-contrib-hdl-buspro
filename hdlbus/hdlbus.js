@@ -85,6 +85,10 @@ module.exports = function(RED) {
 
         if (n.daliId) this.daliId = n.daliId;
 
+        node.bus.on('listening', function() {
+            node.bus.setBroadcast(true);
+        });
+
         this.bus.on('command', processCommand);
 
 		this.on("close",function(){
@@ -116,10 +120,15 @@ module.exports = function(RED) {
                 //console.log(cmd.data.channel + " " + cmd.data.level);
                 break;
             case 0x0033:
-                if (ctrlr.daliId && cmd.target.subnet == ctrlr.subnetid && cmd.target.id == ctrlr.daliId && cmd.data.channel > 64) {
+                if (ctrlr.daliId && cmd.target.subnet == ctrlr.subnetid && cmd.target.id == ctrlr.daliId) { //} && cmd.data.channel > 64) {
                     //Respond on behalf of useless DALI controller for groups (from stored values)
-                    var lvl = chLvl(cmd.target.subnet, cmd.target.id, cmd.data.channel);
-                    ctrlr.bus.sendAs(cmd.target, cmd.sender, 0x0032, {channel: cmd.data.channel, level: lvl, success: true});
+                    var chs = [];
+                    for (var d = 1; d <= 80; d++) {
+                        chs.push({number: d, level: chLvl(cmd.target.subnet, cmd.target.id, d)});
+                    }
+                    ctrlr.bus.sendAs(cmd.target, cmd.sender, 0x0034, {channels: chs});
+                    //var lvl = chLvl(cmd.target.subnet, cmd.target.id, cmd.data.channel);
+                    //ctrlr.bus.sendAs(cmd.target, cmd.sender, 0x0032, {channel: cmd.data.channel, level: lvl, success: true});
                 }
                 break;
             case 0x0034:
