@@ -222,7 +222,7 @@ module.exports = function(RED) {
         var node = this;
         this.on('input', (msg)=>{
             if (!config.channel && (msg.payload.channel == undefined) || (!config.level && (msg.payload.level == undefined))) {
-                node.error("Required parameters msg.channel and msg.level");
+                node.error("Required parameters msg.payload.channel and msg.payload.level");
                 return;
             }
             var tgtAddress = msg.payload.address != undefined  ? msg.address : config.address;
@@ -313,7 +313,7 @@ module.exports = function(RED) {
             }
 
             // Create payload if it doesn't exist
-            if (!msg.payload) msg.payload = {};
+            if (!msg.payload || msg.payload.constructor !== Object) msg.payload = {};
             
             // Insert config values if override doesn't exist
             if (msg.payload.address === undefined) msg.payload.address = config.address;
@@ -401,7 +401,7 @@ module.exports = function(RED) {
         var node = this;
         this.on('input', (msg)=>{
             // Create payload if it doesn't exist
-            if (!msg.payload) msg.payload = {};
+            if (!msg.payload || msg.payload.constructor !== Object) msg.payload = {};
             
             // Insert config values if override doesn't exist
             if (msg.payload.address === undefined) msg.payload.address = config.address;
@@ -428,8 +428,8 @@ module.exports = function(RED) {
         var node = this;
         node.bus = controller.bus;
 
-        var physical = new node.bus.newDevice(config.physicalAddress);
-        var virtual = new node.bus.newDevice(config.virtualAddress);
+        var physical = new node.bus.createDevice(config.physicalAddress);
+        var virtual = new node.bus.createDevice(config.virtualAddress);
 
         node.receivedCmd = function(cmd) {
             if (cmd.target.address == virtual.address) {
