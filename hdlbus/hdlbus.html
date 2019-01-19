@@ -456,46 +456,92 @@
 </div>
 
 <div name='hdl-panel-brightness'>
-        <script type="text/javascript">
-            RED.nodes.registerType('hdl-panel-brightness',{
-                category: 'home automation',
-                color: '#D8BFD8',
-                defaults: {
-                    controller: {value:"", type:"hdl-controller"},
-                    name: {value: ""},
-                    address: {value: "", required: true, validate: RED.validators.regex("^(?:[1-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\.(?:[1-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])$")},
-                    brightness: {value: null, validate: RED.validators.regex("^(?:|[1-9]|[1-9][0-9]|100)$")}
-                },
-                inputs:1,
-                outputs:0,
-                icon: "bridge.png",
-                align: 'right',
-                label: function() {
-                    return (this.name||"hdl panel brightness");
-                }
-            });
-        </script>
-    
-        <script type="text/x-red" data-template-name="hdl-panel-brightness">
-            <div class="form-row">
-                <label for="node-input-controller"><i class="icon-tag"></i> Gateway</label>
-                <input id="node-input-controller">
-            </div>
-            <div class="form-row">
-                <label for="node-input-name"><i class="icon-tag"></i> Name</label>
-                <input type="text" id="node-input-name" placeholder="Name">
-            </div>
-            <div class="form-row">
-                <label for="node-input-address"><i class="icon-tag"></i> Address</label>
-                <input type="text" id="node-input-address" placeholder="eg 1.20">
-            </div>
-            <div class="form-row">
-                <label for="node-input-brightness"><i class="icon-tag"></i> Brightness</label>
-                <input type="text" id="node-input-brightness" placeholder="0-100">
-            </div>
-        </script>
-    
-        <script type="text/x-red" data-help-name="hdl-panel-brightness">
-            <p>Changes the brightness of backlight and status lights.</p>
-        </script>
-    </div>
+    <script type="text/javascript">
+        RED.nodes.registerType('hdl-panel-brightness',{
+            category: 'home automation',
+            color: '#D8BFD8',
+            defaults: {
+                controller: {value:"", type:"hdl-controller"},
+                name: {value: ""},
+                address: {value: "", required: true, validate: RED.validators.regex("^(?:[1-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\.(?:[1-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])$")},
+                brightness: {value: null, validate: RED.validators.regex("^(?:|[1-9]|[1-9][0-9]|100)$")}
+            },
+            inputs:1,
+            outputs:0,
+            icon: "bridge.png",
+            align: 'right',
+            label: function() {
+                return (this.name||"hdl panel brightness");
+            }
+        });
+    </script>
+
+    <script type="text/x-red" data-template-name="hdl-panel-brightness">
+        <div class="form-row">
+            <label for="node-input-controller"><i class="icon-tag"></i> Gateway</label>
+            <input id="node-input-controller">
+        </div>
+        <div class="form-row">
+            <label for="node-input-name"><i class="icon-tag"></i> Name</label>
+            <input type="text" id="node-input-name" placeholder="Name">
+        </div>
+        <div class="form-row">
+            <label for="node-input-address"><i class="icon-tag"></i> Address</label>
+            <input type="text" id="node-input-address" placeholder="eg 1.20">
+        </div>
+        <div class="form-row">
+            <label for="node-input-brightness"><i class="icon-tag"></i> Brightness</label>
+            <input type="text" id="node-input-brightness" placeholder="0-100">
+        </div>
+    </script>
+
+    <script type="text/x-red" data-help-name="hdl-panel-brightness">
+        <p>Changes the brightness of backlight and status lights.</p>
+    </script>
+</div>
+
+<div name='hdl-dali-groups'>
+    <script type="text/javascript">
+        RED.nodes.registerType('hdl-dali-groups',{
+            category: 'home automation',
+            color: '#D8BFD8',
+            defaults: {
+                controller: {value:"", type:"hdl-controller"},
+                physicalAddress: {value: "", required: true, validate: RED.validators.regex("^(?:[1-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\.(?:[1-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])$")},
+                virtualAddress: {value: "", required: true, validate: RED.validators.regex("^(?:[1-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\.(?:[1-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])$")},
+                name: {value: ""},
+            },
+            inputs:0,
+            outputs:0,
+            icon: "bridge.png",
+            label: function() {
+                return (this.name || "hdl dali groups");
+            }
+        });
+    </script>
+
+    <script type="text/x-red" data-template-name="hdl-dali-groups">
+        <div class="form-row">
+            <label for="node-input-controller"><i class="icon-tag"></i> Gateway</label>
+            <input id="node-input-controller">
+        </div>
+        <div class="form-row">
+            <label for="node-input-name"><i class="icon-tag"></i> Name</label>
+            <input type="text" id="node-input-name" placeholder="Name">
+        </div>
+        <div class="form-row">
+            <label for="node-input-address"><i class="icon-tag"></i> Physical Addr</label>
+            <input type="text" id="node-input-physicalAddress" placeholder="eg 1.20">
+        </div>
+        <div class="form-row">
+            <label for="node-input-channel"><i class="icon-tag"></i> Virtual Addr</label>
+            <input type="text" id="node-input-virtualAddress" placeholder="eg 1.21">
+        </div>
+    </script>
+
+    <script type="text/x-red" data-help-name="hdl-dali-groups">
+        <p>Creates a virtual device to provide better access to Dali groups.  Not part of a flow, just drop it on a page.</p>
+        <p>Instead of using channels 65-80 on the dali module, simply use the virtual device as a 16 channel (1-16) dimmer module.</p>
+        <p>Groups map 1:1, channels from the dali module map 64 + x (ie virtual channel 1 is channel 65 / group 1).</p>
+    </script>
+</div>

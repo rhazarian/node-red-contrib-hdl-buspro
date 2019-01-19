@@ -85,7 +85,8 @@ module.exports = function(RED) {
 
         if (n.daliId) this.daliId = n.daliId;
 
-        node.bus.on('listening', function() {
+
+        this.bus.on('listening', function() {
             node.bus.setBroadcast(true);
         });
 
@@ -117,24 +118,12 @@ module.exports = function(RED) {
                 break;
             case 0x0032:
                 chUpd(cmd.sender.subnet, cmd.sender.id, cmd.data.channel, cmd.data.level);
-                //console.log(cmd.data.channel + " " + cmd.data.level);
                 break;
             case 0x0033:
-                if (ctrlr.daliId && cmd.target.subnet == ctrlr.subnetid && cmd.target.id == ctrlr.daliId) { //} && cmd.data.channel > 64) {
-                    //Respond on behalf of useless DALI controller for groups (from stored values)
-                    var chs = [];
-                    for (var d = 1; d <= 80; d++) {
-                        chs.push({number: d, level: chLvl(cmd.target.subnet, cmd.target.id, d)});
-                    }
-                    ctrlr.bus.sendAs(cmd.target, cmd.sender, 0x0034, {channels: chs});
-                    //var lvl = chLvl(cmd.target.subnet, cmd.target.id, cmd.data.channel);
-                    //ctrlr.bus.sendAs(cmd.target, cmd.sender, 0x0032, {channel: cmd.data.channel, level: lvl, success: true});
-                }
                 break;
             case 0x0034:
                 for (channel of cmd.data.channels) {
                     chUpd(cmd.sender.subnet, cmd.sender.id, channel.number, channel.level);
-                    //console.log(channel.number + " " + channel.level);
                 }
                 break;
         }
@@ -332,7 +321,6 @@ module.exports = function(RED) {
             if (msg.payload.state === undefined) msg.payload.state = config.state;
             msg.payload.status = msg.payload.state;
 
-            console.log(util.inspect(msg));
             node.bus.send(msg.payload.address, 0xE01C, msg.payload, function(err) {
                 if (err){
                     node.error(err);   
@@ -394,14 +382,6 @@ module.exports = function(RED) {
                 default: colorOn = [0, 0, 255]; // blue default
             }
 
-            //console.log(util.inspect(colorOn));
-            //console.log(util.inspect(colorOff));
-            //if (!config.switch && (msg.switch == undefined) || ((config.state == undefined) && (msg.state == undefined))) {
-            //    node.error("Required parameters msg.switch and msg.state");
-            //    return;
-            //}
-            //var tgtSwitch = msg.switch != undefined  ? msg.switch : config.switch;
-            //var tgtState = msg.state != undefined ? msg.state : config.state;
             node.bus.send(config.address, 0xE14E, {button: config.button, color: {on: colorOn, off: colorOff}}, function(err) {
                 if (err){
                     node.error(err);   
@@ -441,5 +421,52 @@ module.exports = function(RED) {
         });
     }
     RED.nodes.registerType("hdl-panel-brightness", HdlPanelBrightness);
-}
 
+    function HdlDaliGroups(config) {
+        RED.nodes.createNode(this,config);
+        var controller = RED.nodes.getNode(config.controller);
+        var node = this;
+        node.bus = controller.bus;
+
+        var physical = new node.bus.newDevice(config.physicalAddress);
+        var virtual = new node.bus.newDevice(config.virtualAddress);
+
+        node.receivedCmd = function(cmd) {
+            if (cmd.target.address == virtual.address) {
+                switch (cmd.code) {
+                    case 0x0031:
+                        // Single channel request, forward to physical
+                        cmd.data.channel += 64
+                        node.bus.sendAs(cmd.sender, physical, cmd.code, cmd.data);
+                        break;
+                    case 0x0033:
+                        // Status request to virtual - respond as virtual (from data array)
+                        var chs = [];
+                        for (var d = 1; d <= 16; d++) {
+                            var ch = d + 64;
+                            chs.push({number: d, level: chLvl(physical.subnet, physical.id, ch)});
+                        }
+                        node.bus.sendAs(virtual, cmd.sender, 0x0034, {channels: chs});
+                        break;
+                }
+            } else if (cmd.sender.address == physical.address) {
+                switch (cmd.code) {
+                    case 0x0032:
+                        //Single channel response - forward as virtual device
+                        if (cmd.data.channel > 64) {
+                            cmd.data.channel -= 64
+                            node.bus.sendAs(virtual, cmd.target, cmd.code, cmd.data);
+                        }
+                        break;
+                }
+            }
+		};
+
+		this.bus.on('command', node.receivedCmd);
+
+		this.on("close", ()=>{
+            this.bus.removeListener('command', node.receivedCmd);
+		});
+    }
+    RED.nodes.registerType("hdl-dali-groups", HdlDaliGroups);
+}
