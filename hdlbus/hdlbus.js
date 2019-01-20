@@ -225,10 +225,16 @@ module.exports = function(RED) {
                 node.error("Required parameters msg.payload.channel and msg.payload.level");
                 return;
             }
-            var tgtAddress = msg.payload.address != undefined  ? msg.address : config.address;
-            var tgtChannel = msg.payload.channel != undefined  ? msg.payload.channel : config.channel;
-            var tgtLevel = msg.payload.level != undefined ? msg.payload.level : config.level;
-            node.bus.send(tgtAddress, 0x31, {channel: tgtChannel, level: tgtLevel}, function(err) {
+
+            // Create payload if it doesn't exist
+            if (msg.payload == null || typeof msg.payload != "object") msg.payload = {};
+        
+            // Insert config values if override doesn't exist
+            if (msg.payload.address == null) msg.payload.address = config.address;
+            if (msg.payload.channel == null ) msg.payload.channel = config.channel;
+            if (msg.payload.level == null ) msg.payload.level = config.level;
+
+            node.bus.send(msg.payload.address, 0x31, {channel: msg.payload.channel, level: msg.payload.level}, function(err) {
                 if (err){
                     node.error(err);   
                 }
@@ -251,20 +257,15 @@ module.exports = function(RED) {
                 return;
             }
 
-            if (msg.payload || msg.payload == false) 
-                msg.payload = {original: msg.payload};
-            else
-                msg.payload = {};
+            // Create payload if it doesn't exist
+            if (msg.payload == null || typeof msg.payload != "object") msg.payload = {};
+            
+            // Insert config values if override doesn't exist
+            if (msg.payload.address == null) msg.payload.address = config.address;
+            if (msg.payload.channel == null ) msg.payload.channel = config.channel;
 
-            var tgtAddress = msg.payload.address != undefined  ? msg.address : config.address;
-            var tgtChannel = msg.payload.channel != undefined ? msg.channel : config.channel;
-            var ch = tgtAddress.split(".");
-
-            msg.payload = {
-                address: tgtAddress, 
-                channel: tgtChannel, 
-                level: chLvl(parseInt(ch[0]), parseInt(ch[1]), parseInt(tgtChannel))
-            };
+            var ch = msg.payload.address.split(".");
+            msg.payload.level = chLvl(parseInt(ch[0]), parseInt(ch[1]), parseInt(msg.payload.channel));
             node.send(msg);
         });
        
@@ -313,12 +314,12 @@ module.exports = function(RED) {
             }
 
             // Create payload if it doesn't exist
-            if (!msg.payload || msg.payload.constructor !== Object) msg.payload = {};
+            if (msg.payload == null || typeof msg.payload != "object") msg.payload = {};
             
             // Insert config values if override doesn't exist
-            if (msg.payload.address === undefined) msg.payload.address = config.address;
-            if (msg.payload.switch === undefined ) msg.payload.switch = config.switch;
-            if (msg.payload.state === undefined) msg.payload.state = config.state;
+            if (msg.payload.address == null) msg.payload.address = config.address;
+            if (msg.payload.switch == null ) msg.payload.switch = config.switch;
+            if (msg.payload.state == null) msg.payload.state = config.state;
             msg.payload.status = msg.payload.state;
 
             node.bus.send(msg.payload.address, 0xE01C, msg.payload, function(err) {
@@ -349,18 +350,22 @@ module.exports = function(RED) {
         this.bus = controller.bus;
         var node = this;
         this.on('input', (msg)=>{
+            var colorOff = 0;
+            var colorOn = 0;
             //<option value="1">white</option>
             //<option value="2">red</option>
             //<option value="3">green</option>
             //<option value="4">blue</option>
             //<option value="5">orange</option>
-            var colorOff = payload.colorOff;
-            var colorOn = payload.colorOn;
 
-            //Color override
-            if (msg.btnColors) {
-                colorOn = getColorIndex(msg.btnColors);
-                colorOff = getColorIndex(msg.btnColors);
+            // Create payload if it doesn't exist
+            if (msg.payload == null || typeof msg.payload != "object") msg.payload = {};
+                        
+            if (msg.payload.colorOff == null) colorOff = config.colorOff;
+            if (msg.payload.colorOn == null) colorOn = config.colorOn;
+            if (msg.payload.color != null) {
+                colorOff = getColorIndex(msg.payload.color);
+                colorOn = getColorIndex(msg.payload.color);
             }
             
             switch (parseInt(colorOff)) {
@@ -382,7 +387,15 @@ module.exports = function(RED) {
                 default: colorOn = [0, 0, 255]; // blue default
             }
 
-            node.bus.send(config.address, 0xE14E, {button: config.button, color: {on: colorOn, off: colorOff}}, function(err) {
+            var data = {
+                "button": config.button, 
+                "color": {
+                    "off": colorOff, 
+                    "on": colorOn
+                }    
+            };
+
+            node.bus.send(config.address, 0xE14E, data, function(err) {
                 if (err){
                     node.error(err);   
                 }
@@ -401,11 +414,11 @@ module.exports = function(RED) {
         var node = this;
         this.on('input', (msg)=>{
             // Create payload if it doesn't exist
-            if (!msg.payload || msg.payload.constructor !== Object) msg.payload = {};
+            if (msg.payload == null || typeof msg.payload != "object") msg.payload = {};
             
             // Insert config values if override doesn't exist
-            if (msg.payload.address === undefined) msg.payload.address = config.address;
-            if (msg.payload.brightness === undefined ) msg.payload.brightness = config.brightness;
+            if (msg.payload.address == null) msg.payload.address = config.address;
+            if (msg.payload.brightness == null ) msg.payload.brightness = config.brightness;
             msg.payload.backlight = msg.payload.brightness;
             msg.payload.statusLights = msg.payload.brightness;
 
