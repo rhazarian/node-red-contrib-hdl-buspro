@@ -482,4 +482,53 @@ module.exports = function(RED) {
 		});
     }
     RED.nodes.registerType("hdl-dali-groups", HdlDaliGroups);
+
+    function HdlAirconIn(config) {
+        RED.nodes.createNode(this,config);
+        var controller = RED.nodes.getNode(config.controller);
+        var node = this;
+        node.bus = controller.bus;
+        node.receivedCmd = function(cmd){    
+            if (cmd.code == 0x193A
+                && config.address == cmd.target.address
+            ) {
+                var msg = {};
+                msg.sender = cmd.sender.address;
+                msg.payload = cmd.data;
+                msg.topic = 'command';
+                node.send(msg);
+            }
+		};
+
+		this.bus.on('command', node.receivedCmd);
+
+		this.on("close", ()=>{
+            this.bus.removeListener('command', node.receivedCmd);
+		});
+    }
+    RED.nodes.registerType("hdl-aircon-in",HdlAirconIn);
+
+    function HdlAirconOut(config) {
+        RED.nodes.createNode(this,config);
+        var controller = RED.nodes.getNode(config.controller);
+        this.bus = controller.bus;
+        var node = this;
+        this.on('input', (msg)=>{
+            if (!msg.payload) {
+                node.error("Required parameter: msg.payload");
+                return;
+            }
+
+            node.bus.sendAs(config.address, "255.255", 0x193B, msg.payload, function(err) {
+                if (err){
+                    node.error(err);   
+                }
+            });
+        });
+       
+        this.on("close", ()=>{
+        });
+    }
+    RED.nodes.registerType("hdl-aircon-out", HdlAirconOut);
+
 }
