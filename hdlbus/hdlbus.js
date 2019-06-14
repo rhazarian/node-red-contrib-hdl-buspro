@@ -483,7 +483,7 @@ module.exports = function(RED) {
     }
     RED.nodes.registerType("hdl-dali-groups", HdlDaliGroups);
 
-    function HdlAirconIn(config) {
+    function HdlVirtualHvacIn(config) {
         RED.nodes.createNode(this,config);
         var controller = RED.nodes.getNode(config.controller);
         var node = this;
@@ -506,9 +506,9 @@ module.exports = function(RED) {
             this.bus.removeListener('command', node.receivedCmd);
 		});
     }
-    RED.nodes.registerType("hdl-aircon-in",HdlAirconIn);
+    RED.nodes.registerType("hdl-virtual-hvac-in",HdlVirtualHvacIn);
 
-    function HdlAirconOut(config) {
+    function HdlVirtualHvacOut(config) {
         RED.nodes.createNode(this,config);
         var controller = RED.nodes.getNode(config.controller);
         this.bus = controller.bus;
@@ -529,6 +529,6 @@ module.exports = function(RED) {
         this.on("close", ()=>{
         });
     }
-    RED.nodes.registerType("hdl-aircon-out", HdlAirconOut);
+    RED.nodes.registerType("hdl-virtual-hvac-out", HdlVirtualHvacOut);
 
 }

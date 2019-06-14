@@ -8,6 +8,7 @@ The motivation for creating this node set was to fill a perceived gap in functio
 * a get node for device channels (based on stored values)
 * a button color node to change the LED color of the new capacitive touch buttons
 * a panel brightness node to facilitate dimming panels eg. at night
+* input/output nodes enabling the creation of a virtual HVAC system
 * raw nodes to allow you to craft messages to send/receive anything on the HDL network
 
 This is by no means perfect - happy to hear any suggestions.  
@@ -109,6 +110,63 @@ Send request to update panel brightness (1-255).  Note that low brightness value
 }
 ```
 
+## hdl-virtual-hvac-in
+Listens for HVAC request messages targetted at the specified address and outputs the data as a JSON payload
+
+### Output Message
+```js
+msg:{
+  sender: "1.2" //ID of Sender Device
+  target: "1.50" //ID of Target Device
+  code: 50    //Integer with command operation code
+  payload: {
+        acstatus: 1, //Status: 1 on, 0 off
+        acno: 1, //AC No, set in DLP
+        setupmode: 1, //Mode: 0 cooling, 1 heating, 2 fan, 3 auto, 4 dry
+        setupspeed: 0, //Fan Speed: 0 Auto, 1 High, 2 Medium, 3 Low.
+        temperature: {
+            type: 0, //Type: 0 celsius, 1 farenheit
+            now: 21, //DLP Temprature
+            cooling: 21, //Cooling Temprature
+            heating: 21, //Heating Temprature
+            auto: 21, //Auto Temprature
+            dry: 21 //Dry Temprature
+        },
+        modeandfan: 48, //Mode and Fan always 48
+        currentmode: 21, //Current Mode Temprature
+        sweep: 0 //Sweep?
+    }
+}
+```
+
+## hdl-virtual-hvac-out
+Accepts a JSON payload (_must_ be complete) and transmits to the broadcast (255.255) address with a source of the specified address.
+
+### Input Message
+```js
+msg:{
+  target: "1.52" //ID of Target Device
+  code: 49    //Integer with command operation code
+  payload: {
+        acstatus: 1, //Status: 1 on, 0 off
+        acno: 1, //AC No, set in DLP
+        setupmode: 1, //Mode: 0 cooling, 1 heating, 2 fan, 3 auto, 4 dry
+        setupspeed: 0, //Fan Speed: 0 Auto, 1 High, 2 Medium, 3 Low.
+        temperature: {
+            type: 0, //Type: 0 celsius, 1 farenheit
+            now: 21, //DLP Temprature
+            cooling: 21, //Cooling Temprature
+            heating: 21, //Heating Temprature
+            auto: 21, //Auto Temprature
+            dry: 21 //Dry Temprature
+        },
+        modeandfan: 48, //Mode and Fan always 48
+        currentmode: 21, //Current Mode Temprature
+        sweep: 0 //Sweep?
+    }  
+}
+```
+
 ## hdl-raw-in
 Receive (any) commands from HDL (Smart-Bus) network
 
@@ -136,3 +194,8 @@ msg:{
   	}   
 }
 ```
+
+# Change Log
+
+## 1.1.4
+* Added input/output nodes for creating virtual HVAC device.
