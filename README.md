@@ -111,60 +111,51 @@ Send request to update panel brightness (1-255).  Note that low brightness value
 ```
 
 ## hdl-virtual-hvac-in
-Listens for HVAC request messages targetted at the specified address and outputs the data as a JSON payload
+Listens for HVAC request messages targetted at the specified address (eg. if you're emulating a HVAC device at `1.51`, use `1.51` in the address field) and outputs the data as a JSON payload
 
-### Output Message
+### Output Payload
 ```js
-msg:{
-  sender: "1.2" //ID of Sender Device
-  target: "1.50" //ID of Target Device
-  code: 50    //Integer with command operation code
-  payload: {
-        acstatus: 1, //Status: 1 on, 0 off
-        acno: 1, //AC No, set in DLP
-        setupmode: 1, //Mode: 0 cooling, 1 heating, 2 fan, 3 auto, 4 dry
-        setupspeed: 0, //Fan Speed: 0 Auto, 1 High, 2 Medium, 3 Low.
-        temperature: {
-            type: 0, //Type: 0 celsius, 1 farenheit
-            now: 21, //DLP Temprature
-            cooling: 21, //Cooling Temprature
-            heating: 21, //Heating Temprature
-            auto: 21, //Auto Temprature
-            dry: 21 //Dry Temprature
-        },
-        modeandfan: 48, //Mode and Fan always 48
-        currentmode: 21, //Current Mode Temprature
-        sweep: 0 //Sweep?
-    }
+{
+    "acstatus": 1, //Status: 1 on, 0 off
+    "acno": 1, //AC No, set in DLP
+    "setupmode": 1, //Mode: 0 cooling, 1 heating, 2 fan, 3 auto, 4 dry
+    "setupspeed": 0, //Fan Speed: 0 Auto, 1 High, 2 Medium, 3 Low.
+    "temperature": {
+        "type": 0, //Type: 0 celsius, 1 farenheit
+        "now": 21, //DLP Temprature
+        "cooling": 21, //Cooling Temprature
+        "heating": 21, //Heating Temprature
+        "auto": 21, //Auto Temprature
+        "dry": 21 //Dry Temprature
+    },
+    "modeandfan": 48, //Mode and Fan always 48
+    "currentmode": 21, //Current Mode Temprature
+    "sweep": 0 //Sweep?
 }
 ```
 
 ## hdl-virtual-hvac-out
-Accepts a JSON payload (_must_ be complete) and transmits to the broadcast (255.255) address with a source of the specified address.
+Accepts a JSON payload (_must_ be complete) and transmits to the broadcast (255.255) address with a source of the specified address (eg. if you're emulating a HVAC device at `1.51`, use `1.51` in the address field).
 
-### Input Message
+### Input Payload
 ```js
-msg:{
-  target: "1.52" //ID of Target Device
-  code: 49    //Integer with command operation code
-  payload: {
-        acstatus: 1, //Status: 1 on, 0 off
-        acno: 1, //AC No, set in DLP
-        setupmode: 1, //Mode: 0 cooling, 1 heating, 2 fan, 3 auto, 4 dry
-        setupspeed: 0, //Fan Speed: 0 Auto, 1 High, 2 Medium, 3 Low.
-        temperature: {
-            type: 0, //Type: 0 celsius, 1 farenheit
-            now: 21, //DLP Temprature
-            cooling: 21, //Cooling Temprature
-            heating: 21, //Heating Temprature
-            auto: 21, //Auto Temprature
-            dry: 21 //Dry Temprature
-        },
-        modeandfan: 48, //Mode and Fan always 48
-        currentmode: 21, //Current Mode Temprature
-        sweep: 0 //Sweep?
-    }  
-}
+{
+    "acstatus": 1, //Status: 1 on, 0 off
+    "acno": 1, //AC No, set in DLP
+    "setupmode": 1, //Mode: 0 cooling, 1 heating, 2 fan, 3 auto, 4 dry
+    "setupspeed": 0, //Fan Speed: 0 Auto, 1 High, 2 Medium, 3 Low.
+    "temperature": {
+        "type": 0, //Type: 0 celsius, 1 farenheit
+        "now": 21, //DLP Temprature
+        "cooling": 21, //Cooling Temprature
+        "heating": 21, //Heating Temprature
+        "auto": 21, //Auto Temprature
+        "dry": 21 //Dry Temprature
+    },
+    "modeandfan": 48, //Mode and Fan always 48
+    "currentmode": 21, //Current Mode Temprature
+    "sweep": 0 //Sweep?
+} 
 ```
 
 ## hdl-raw-in
@@ -173,10 +164,10 @@ Receive (any) commands from HDL (Smart-Bus) network
 ### Output Message
 ```js
 msg:{
-  sender: "1.2" //ID of Sender Device
-  target: "255.255" //ID of Target Device
-  code: 50    //Integer with command operation code
-  payload: {}   //Object with decoded data or raw buffer if data can not be parsed automatically
+  "sender": "1.2" //ID of Sender Device
+  "target": "255.255" //ID of Target Device
+  "code": 50    //Integer with command operation code
+  "payload": {}   //Object with decoded data or raw buffer if data can not be parsed automatically
 }
 ```
 
@@ -186,11 +177,11 @@ Send (any) commands to the HDL (Smart-Bus) network
 ### Input Message
 ```js
 msg:{
-  target: "1.52" //ID of Target Device
-  code: 49    //Integer with command operation code
-  payload: { //Object with data or raw buffer 
-  		channel: 2,
-  		level: 100
+  "target": "1.52" //ID of Target Device
+  "code": 49    //Integer with command operation code
+  "payload": { //Object with data or raw buffer 
+  		"channel": 2,
+  		"level": 100
   	}   
 }
 ```
