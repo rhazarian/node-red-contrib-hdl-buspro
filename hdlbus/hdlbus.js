@@ -531,4 +531,44 @@ module.exports = function(RED) {
     }
     RED.nodes.registerType("hdl-virtual-hvac-out", HdlVirtualHvacOut);
 
+    function HdlVirtualTempSensor(config) {
+        RED.nodes.createNode(this,config);
+        var controller = RED.nodes.getNode(config.controller);
+        var node = this;
+        node.bus = controller.bus;
+
+        node.temp = [];
+
+        node.receivedCmd = function(cmd){    
+            if (cmd.code == 0x1948 && config.address == cmd.target) {
+                // Request for temperature received, create payload from stored data
+                var payload = {
+                    channel: cmd.data.channel || 0,
+                    temperature: node.temp[cmd.data.channel || 0] || -1
+                }
+                // Send to network
+                node.bus.sendAs(config.address, "255.255", 0x1949, payload, function(err) {
+                    if (err){
+                        node.error(err);   
+                    }
+                });
+            }
+		};
+        
+        this.on('input', (msg)=>{
+            if (!msg.payload || !msg.payload.temperature) {
+                node.error("Required parameter: msg.payload.temperature");
+                return;
+            }
+            
+            node.temp[msg.payload.channel || 0] = msg.payload.temperature;
+        });
+       
+		this.bus.on('command', node.receivedCmd);
+
+		this.on("close", ()=>{
+            this.bus.removeListener('command', node.receivedCmd);
+		});
+    }
+    RED.nodes.registerType("hdl-virtual-temp-sensor", HdlVirtualTempSensor);    
 }

@@ -627,3 +627,46 @@
         <p><b>msg.payload</b> - hvac status update</p>
     </script>
 </div>
+
+<div name='hdl-virtual-temp-sensor'>
+    <script type="text/javascript">
+        RED.nodes.registerType('hdl-virtual-temp-sensor',{
+            category: 'home automation',
+            color: '#D8BFD8',
+            defaults: {
+                controller: {value:"", type:"hdl-controller"},
+                name: {value: ""},
+                address: {value: "1.1", required: true, validate: RED.validators.regex("^(?:[1-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\.(?:[1-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])$")}
+            },
+            inputs: 1,
+            outputs: 0,
+            icon: "bridge.png",
+            align: 'right',
+            label: function() {
+                return (this.name||"hdl temp sensor") + ' ' + this.address;
+            }
+        });
+    </script>
+
+    <script type="text/x-red" data-template-name="hdl-virtual-temp-sensor">
+        <div class="form-row">
+            <label for="node-input-controller"><i class="icon-tag"></i> Gateway</label>
+            <input id="node-input-controller">
+        </div>
+        <div class="form-row">
+            <label for="node-input-name"><i class="icon-tag"></i> Name</label>
+            <input type="text" id="node-input-name" placeholder="Name">
+        </div>
+        <div class="form-row">
+            <label for="node-input-address"><i class="icon-tag"></i> Virtual Addr</label>
+            <input type="text" id="node-input-address" placeholder="eg. 1.1">
+        </div>
+    </script>
+
+    <script type="text/x-red" data-help-name="hdl-virtual-temp-sensor">
+        <p>A virtual temperature sensor.  Accepts flow input to update temperature, and responds to HDL network temperature requests.</p>
+        <p>As per HDL documentation, this is multi-valued.  You can store multiple temperature datapoints in this node by using the <i>channel</i> parameter.</p>
+        <p><b>msg.payload.channel</b> - channel to set</p>
+        <p><b>msg.payload.temperature</b> - actual temperature value</p>
+    </script>
+</div>
