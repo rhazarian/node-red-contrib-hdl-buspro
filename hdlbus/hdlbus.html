@@ -666,7 +666,7 @@
     <script type="text/x-red" data-help-name="hdl-virtual-temp-sensor">
         <p>A virtual temperature sensor.  Accepts flow input to update temperature, and responds to HDL network temperature requests.</p>
         <p>As per HDL documentation, this is multi-valued.  You can store multiple temperature datapoints in this node by using the <i>channel</i> parameter.</p>
-        <p><b>msg.payload.channel</b> - channel to set</p>
+        <p><b>msg.payload.channel</b> - channel to set (defaults to 1 if unset)</p>
         <p><b>msg.payload.temperature</b> - actual temperature value</p>
     </script>
 </div>

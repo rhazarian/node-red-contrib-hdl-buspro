@@ -537,17 +537,18 @@ module.exports = function(RED) {
         var node = this;
         node.bus = controller.bus;
 
+        // Array to store temperature values (indexed on channel)
         node.temp = [];
 
         node.receivedCmd = function(cmd){    
-            if (cmd.code == 0x1948 && config.address == cmd.target) {
+            if ((cmd.code == 0x1948 || cmd.code == 0xE3E7) && config.address == cmd.target.address) {
                 // Request for temperature received, create payload from stored data
                 var payload = {
-                    channel: cmd.data.channel || 0,
-                    temperature: node.temp[cmd.data.channel || 0] || -1
+                    channel: cmd.data.channel || 1,
+                    temperature: node.temp[cmd.data.channel || 1] || 0
                 }
                 // Send to network
-                node.bus.sendAs(config.address, "255.255", 0x1949, payload, function(err) {
+                node.bus.sendAs(config.address, cmd.sender.address, (cmd.code == 0x1948 ? 0x1949 : 0xE3E8), payload, function(err) {
                     if (err){
                         node.error(err);   
                     }
@@ -560,8 +561,8 @@ module.exports = function(RED) {
                 node.error("Required parameter: msg.payload.temperature");
                 return;
             }
-            
-            node.temp[msg.payload.channel || 0] = msg.payload.temperature;
+            // Store temperature
+            node.temp[msg.payload.channel || 1] = msg.payload.temperature;
         });
        
 		this.bus.on('command', node.receivedCmd);
