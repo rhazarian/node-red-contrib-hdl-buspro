@@ -1,5 +1,5 @@
 var util = require("util");
-var SmartBus = require('smart-bus-mrgadget');
+var SmartBus = require('hdl-buspro');
 var EventEmitter = require('events').EventEmitter;
 var cmdsLink = {
 	49: 50
@@ -140,6 +140,7 @@ module.exports = function(RED) {
 		  	msg.target = cmd.target.address;
 		  	msg.code = cmd.code;
 		  	msg.payload = cmd.data;
+            msg.data = cmd.rawData;
             msg.topic = 'command';
 		  	node.send(msg);
 		};

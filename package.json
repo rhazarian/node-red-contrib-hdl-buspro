@@ -1,6 +1,6 @@
 {
-  "name": "node-red-contrib-hdlbus",
-  "version": "1.1.6",
+  "name": "node-red-contrib-hdl-buspro",
+  "version": "1.1.7",
   "description": "Node-Red implementation of HDL BusPro (SmartBus) protocol http://hdlautomation.com",
   "main": "index.js",
   "scripts": {
@@ -8,7 +8,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/mrgadget/node-red-contrib-hdlbus.git"
+    "url": "git+https://github.com/rhazarian/node-red-contrib-hdl-buspro.git"
   },
   "keywords": [
     "node-red",
@@ -24,10 +24,10 @@
   "author": "@bennuttall",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/mrgadget/node-red-contrib-hdlbus/issues"
+    "url": "https://github.com/rhazarian/node-red-contrib-hdl-buspro/issues"
   },
-  "homepage": "https://github.com/mrgadget/node-red-contrib-hdlbus#readme",
+  "homepage": "https://github.com/rhazarian/node-red-contrib-hdl-buspro#readme",
   "dependencies": {
-    "smart-bus-mrgadget": "^0.5.4"
+    "hdl-buspro": "^0.5.5"
   }
 }
