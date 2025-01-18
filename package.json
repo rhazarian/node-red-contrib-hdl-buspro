@@ -1,6 +1,6 @@
 {
   "name": "node-red-contrib-hdl-buspro",
-  "version": "1.1.7",
+  "version": "1.1.8",
   "description": "Node-Red implementation of HDL BusPro (SmartBus) protocol http://hdlautomation.com",
   "main": "index.js",
   "scripts": {
@@ -28,6 +28,6 @@
   },
   "homepage": "https://github.com/rhazarian/node-red-contrib-hdl-buspro#readme",
   "dependencies": {
-    "hdl-buspro": "^0.5.5"
+    "hdl-buspro": "^0.5.6"
   }
 }
